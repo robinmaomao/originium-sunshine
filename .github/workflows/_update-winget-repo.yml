@@ -1,0 +1,29 @@
+---
+# This workflow is centrally managed in https://github.com/LizardByte/.github/
+# Don't make changes to this file in this repo as they will be overwritten with changes made to the same file in
+# the above-mentioned repo.
+
+# To use, select `winget` in the `workflow_profiles` repository custom property.
+
+# Update Winget on release events.
+
+name: Update Winget repo
+permissions: {}
+
+on:
+  release:
+    types:
+      - released
+
+concurrency:
+  group: "${{ github.workflow }}-${{ github.event.release.tag_name }}"
+  cancel-in-progress: true
+
+jobs:
+  update-winget-repo:
+    name: Update Winget repo
+    uses: LizardByte/.github/.github/workflows/__call-update-winget-repo.yml@master
+    permissions:
+      contents: read
+    secrets:
+      GH_TOKEN: ${{ secrets.GH_BOT_TOKEN }}
