@@ -1,0 +1,66 @@
+name: Build (Windows)
+
+on:
+  push:
+    branches: [originium]
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  windows:
+    name: Windows UCRT64
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            git
+            mingw-w64-ucrt-x86_64-toolchain
+            mingw-w64-ucrt-x86_64-cmake
+            mingw-w64-ucrt-x86_64-ninja
+            mingw-w64-ucrt-x86_64-boost
+            mingw-w64-ucrt-x86_64-curl-winssl
+            mingw-w64-ucrt-x86_64-openssl
+            mingw-w64-ucrt-x86_64-opus
+            mingw-w64-ucrt-x86_64-onevpl
+            mingw-w64-ucrt-x86_64-miniupnpc
+            mingw-w64-ucrt-x86_64-cppwinrt
+            mingw-w64-ucrt-x86_64-qt6-static
+            mingw-w64-ucrt-x86_64-MinHook
+            mingw-w64-ucrt-x86_64-nsis
+
+      - name: Configure
+        shell: msys2 {0}
+        run: |
+          export TOOLCHAIN=ucrt-x86_64
+          cmake -B build -G Ninja -S .
+
+      - name: Build
+        shell: msys2 {0}
+        run: ninja -C build
+
+      - name: Package portable ZIP
+        shell: msys2 {0}
+        run: cpack -G ZIP --config ./build/CPackConfig.cmake
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sunshine-windows-ucrt64
+          path: |
+            build/*.zip
+          if-no-files-found: warn
