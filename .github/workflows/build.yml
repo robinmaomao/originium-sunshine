@@ -63,12 +63,13 @@ jobs:
 
       - name: Package portable ZIP
         shell: msys2 {0}
-        run: cpack -G ZIP --config ./build/CPackConfig.cmake
+        run: |
+          cpack -G ZIP --config ./build/CPackConfig.cmake
+          cp build/cpack_artifacts/Sunshine.zip Sunshine-Originium-x64.zip
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: sunshine-windows-ucrt64
-          path: |
-            build/*.zip
-          if-no-files-found: warn
+          path: Sunshine-Originium-x64.zip
+          if-no-files-found: error
