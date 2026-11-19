@@ -28,7 +28,7 @@ git rebase upstream/master
 
 | ID | Title | Status |
 |---|---|---|
-| 0001 | [Session events API](./patches/0001-session-events.md) | design |
+| 0001 | [Session status API](./patches/0001-session-events.md) | implemented |
 | 0002 | [Trim embedded WebUI](./patches/0002-trim-webui.md) | design |
 
 Patch documents describe the intended change, touched files, API contract and

@@ -2544,6 +2544,27 @@ namespace confighttp {
   }
 
   /**
+   * @brief Return the current streaming session status.
+   *
+   * @api_examples{/api/session|:| GET|:| null}
+   */
+  void getSessionStatus(const resp_https_t &response, const req_https_t &request) {
+    if (!authenticate(response, request)) {
+      return;
+    }
+
+    print_req(request);
+
+    const int app_id = proc::proc.running();
+    nlohmann::json output_tree;
+    output_tree["running"] = app_id != 0;
+    output_tree["appId"] = app_id;
+    output_tree["appName"] = app_id != 0 ? proc::proc.get_last_run_app_name() : "";
+    output_tree["state"] = app_id != 0 ? "streaming" : "idle";
+    send_response(response, output_tree);
+  }
+
+  /**
    * @brief Start the HTTPS configuration server.
    */
   void start() {
@@ -2589,6 +2610,7 @@ namespace confighttp {
     server.resource["^/api/clients/update$"]["POST"] = updateClient;
     server.resource["^/api/config$"]["GET"] = getConfig;
     server.resource["^/api/config$"]["POST"] = saveConfig;
+    server.resource["^/api/session$"]["GET"] = getSessionStatus;
     server.resource["^/api/configLocale$"]["GET"] = getLocale;
     server.resource["^/api/covers/([0-9]+)$"]["GET"] = getCover;
     server.resource["^/api/covers/upload$"]["POST"] = uploadCover;
